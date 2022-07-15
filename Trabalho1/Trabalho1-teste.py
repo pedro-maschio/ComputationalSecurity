@@ -7,9 +7,9 @@ class Cipher:
     def cipher_or_decipher(self, message, key, operation):
         message_length = len(message)
         key_length = len(key)
-        message = ''.join(character.lower() for character in message if character.isalpha())
+        message = ''.join(character.lower() for character in message if (character.isascii() and character.isalpha()))
 
-        if message_length <= 0 or key_length <= 0 or key_length <= message_length:
+        if message_length <= 0 or key_length <= 0 or message_length <=key_length:
             return "NULL_MSG"
 
         cipher_text = ""
@@ -42,13 +42,17 @@ class Cipher:
 class Attack:
 
     def breakCiphertext(self, cipherText, language='pt-BR'):
-        cipherText = ''.join(character.lower() for character in cipherText if character.isalpha())
+        cipherText = ''.join(character.lower() for character in cipherText if (character.isascii() and character.isalpha()))
         matchingsList = self.find_matchings(cipherText) # 10 is the max key length we are considering
 
         max_key_length =  matchingsList.index(max(matchingsList[:10]))+1 # max key len is 10
         print(max_key_length)
         testGroups = self.groups(cipherText, max_key_length)
-        frequencyAnalysis = self.frequency_analysis(testGroups, language)
+        key = self.frequency_analysis(testGroups, language)
+        print(key)
+
+        c = Cipher()
+        print(c.cipher_or_decipher(cipherText, key, 'D'))
 
 
     def frequency_analysis(self, groupFrequencies, language):
@@ -64,12 +68,13 @@ class Attack:
 
         baseFrequencies = list(map(float, baseFrequencies))
 
-
+        key = ""
         for i in range(key_len):
-            max = self.get_max_frequency(baseFrequencies, groupFrequencies[i])
+            max = self.get_max_frequency_letter(baseFrequencies, groupFrequencies[i])
+            key += max
+        return key
 
-
-    def get_max_frequency(self, baseFrequencies, frequencies):
+    def get_max_frequency_letter(self, baseFrequencies, frequencies):
         letter = 0
         prev_max = 0
         for i in range(26):
@@ -82,9 +87,8 @@ class Attack:
                 letter = i
 
             frequencies = self.shiftLeft(frequencies, 1)
+        return chr(letter+ord('a'))
 
-        print(chr(letter+ord('a')), end='')
-        print()
 
 
     def shiftLeft(self, lista, numShifts):
