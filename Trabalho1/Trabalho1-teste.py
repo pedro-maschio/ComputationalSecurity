@@ -1,3 +1,4 @@
+from email.mime import base
 from random import randrange
 import string 
 
@@ -6,9 +7,9 @@ class Cipher:
     def cipher_or_decipher(self, message, key, operation):
         message_length = len(message)
         key_length = len(key)
-        message = ''.joing(character.lower() for character in message if character.isalpha())
+        message = ''.join(character.lower() for character in message if character.isalpha())
 
-        if message_length <= 0 or key_length <= 0:
+        if message_length <= 0 or key_length <= 0 or key_length <= message_length:
             return "NULL_MSG"
 
         cipher_text = ""
@@ -41,23 +42,17 @@ class Cipher:
 class Attack:
 
     def breakCiphertext(self, cipherText, language='pt-BR'):
+        cipherText = ''.join(character.lower() for character in cipherText if character.isalpha())
         matchingsList = self.find_matchings(cipherText) # 10 is the max key length we are considering
 
-        l =  matchingsList.index(max(matchingsList))+1
-        
-        for guessedKeyLength in range(1, l):
-            key = []
-            for i in range(0, guessedKeyLength):
-                percentages = self.make_percentages(cipherText, i, guessedKeyLength)
-                max_percentage = self.get_max_percentage(percentages, language) + 1
-                key.append(max_percentage)
+        max_key_length =  matchingsList.index(max(matchingsList[:10]))+1 # max key len is 10
+        print(max_key_length)
+        testGroups = self.groups(cipherText, max_key_length)
+        frequencyAnalysis = self.frequency_analysis(testGroups, language)
 
-            res = ""
-            for i in key:
-                res += chr(i+64)
-            print(res)
 
-    def get_max_percentage(self, percentages, language):
+    def frequency_analysis(self, groupFrequencies, language):
+        key_len = len(groupFrequencies)
 
         baseFrequencies = []
         if language == 'pt-BR':
@@ -66,35 +61,52 @@ class Attack:
         else:
             with open('freq_en.txt') as f:
                 baseFrequencies = f.readlines()   
+
         baseFrequencies = list(map(float, baseFrequencies))
-        
-        totalList = []
+
+
+        for i in range(key_len):
+            max = self.get_max_frequency(baseFrequencies, groupFrequencies[i])
+
+
+    def get_max_frequency(self, baseFrequencies, frequencies):
+        letter = 0
+        prev_max = 0
         for i in range(26):
-            total = 0 
+            res = 0 
             for j in range(26):
-                total += percentages[j]*baseFrequencies[j]
-            totalList.append(total)
-            percentages = percentages[1:] + percentages[:1]
+                res += baseFrequencies[j]*frequencies[j]
+
+            if res >= prev_max:
+                prev_max = res 
+                letter = i
+
+            frequencies = self.shiftLeft(frequencies, 1)
+
+        print(chr(letter+ord('a')), end='')
+        print()
+
+
+    def shiftLeft(self, lista, numShifts):
+        return lista[numShifts:] + lista[:numShifts]
+
+    def groups(self, cipherText, key_length):
+        frequencies = []
+        for i in range(key_length):
+            frequencies.append([0]*26)
+
+
+        for i in range(len(cipherText)):
+            frequencies[i%key_length][ord(cipherText[i])-ord('a')] += 1
+
+
+        for i in range(key_length):
+            for j in range(26):
+                frequencies[i][j] /= 26
+        
    
-        return totalList.index(max(totalList))
-
-            
-
-    def make_percentages(self, cipherText, keyLength, keyGuess):
-        alphabet = string.ascii_uppercase
-        frequencies = {character:0 for character in alphabet}
-
-        # Contamos as frequencias em "Batches" de tamanho keyGuess
-        for x in range(len(cipherText)):
-            if x % keyGuess == keyLength:
-                if cipherText[x] in alphabet:
-                    frequencies[cipherText[x]] += 1 
-
-        percentages = []
-
-        for character in alphabet:
-            percentages.append(frequencies[character]/len(cipherText))
-        return percentages
+        return frequencies
+        
 
     def find_matchings(self, cipherText):
         matching_numbers = []

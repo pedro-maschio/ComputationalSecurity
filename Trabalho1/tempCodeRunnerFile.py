@@ -1,1 +1,0 @@
-print(c.cipher_or_decipher(ciphered_text, 'JOAO', 'D'))
