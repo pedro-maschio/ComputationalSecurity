@@ -1,3 +1,4 @@
+from email.mime import base
 from random import randrange
 import string 
 
@@ -6,28 +7,31 @@ class Cipher:
     def cipher_or_decipher(self, message, key, operation):
         message_length = len(message)
         key_length = len(key)
-        message = ''.joing(character.lower() for character in message if character.isalpha())
+        message = ''.join(character.lower() for character in message if character.isascii())
+        key = key.lower()
+   
 
-        if message_length <= 0 or key_length <= 0:
+        if message_length <= 0 or key_length <= 0 or message_length < key_length:
             return "NULL_MSG"
 
         cipher_text = ""
         num_special = 0
 
         for i in range(len(message)):
-            caracter_ord = ord(message[i])
+            caracter_ord = ord(message[i]) - ord('a')
             special_character = False
-            
+
             if operation == 'C':
-                if message[i] >= 'A' and message[i] <= 'Z':
-                    ciphered_character = chr((caracter_ord + ord(key[(i-num_special)%len(key)]))%26 + ord('A'))
+                if message[i].isalpha():
+                    ciphered_character = chr((caracter_ord + ord(key[(i-num_special)%len(key)]) - ord('a'))%26 + ord('a'))
                 else: 
                     special_character = True
             else:
-                if message[i] >= 'A' and message[i] <= 'Z':
-                    ciphered_character = chr((caracter_ord - ord(key[(i-num_special)%len(key)]))%26 + ord('A'))
+                if message[i].isalpha():
+                    ciphered_character = chr((caracter_ord - (ord(key[(i-num_special)%len(key)]) - ord('a')))%26 + ord('a'))
                 else:
                     special_character = True
+            
 
             if not special_character:
                 cipher_text += ciphered_character
@@ -41,23 +45,23 @@ class Cipher:
 class Attack:
 
     def breakCiphertext(self, cipherText, language='pt-BR'):
+        cipherTextTemp = cipherText
+        cipherText = ''.join(character.lower() for character in cipherText if (character.isascii() and character.isalpha()))
         matchingsList = self.find_matchings(cipherText) # 10 is the max key length we are considering
 
-        l =  matchingsList.index(max(matchingsList))+1
-        
-        for guessedKeyLength in range(1, l):
-            key = []
-            for i in range(0, guessedKeyLength):
-                percentages = self.make_percentages(cipherText, i, guessedKeyLength)
-                max_percentage = self.get_max_percentage(percentages, language) + 1
-                key.append(max_percentage)
+        max_key_length =  matchingsList.index(max(matchingsList[:10]))+1 # max key len is 10
 
-            res = ""
-            for i in key:
-                res += chr(i+64)
-            print(res)
+        testGroups = self.groups(cipherText, max_key_length)
+        key = self.frequency_analysis(testGroups, language)
+        print(key)
 
-    def get_max_percentage(self, percentages, language):
+        c = Cipher()
+
+        print(c.cipher_or_decipher(cipherTextTemp, key, 'D'))
+
+
+    def frequency_analysis(self, groupFrequencies, language):
+        key_len = len(groupFrequencies)
 
         baseFrequencies = []
         if language == 'pt-BR':
@@ -66,35 +70,53 @@ class Attack:
         else:
             with open('freq_en.txt') as f:
                 baseFrequencies = f.readlines()   
+
         baseFrequencies = list(map(float, baseFrequencies))
-        
-        totalList = []
+
+        key = ""
+        for i in range(key_len):
+            max = self.get_max_frequency_letter(baseFrequencies, groupFrequencies[i])
+            key += max
+        return key
+
+    def get_max_frequency_letter(self, baseFrequencies, frequencies):
+        letter = 0
+        prev_max = 0
         for i in range(26):
-            total = 0 
+            res = 0 
             for j in range(26):
-                total += percentages[j]*baseFrequencies[j]
-            totalList.append(total)
-            percentages = percentages[1:] + percentages[:1]
+                res += baseFrequencies[j]*frequencies[j]
+
+            if res >= prev_max:
+                prev_max = res 
+                letter = i
+
+            frequencies = self.shiftLeft(frequencies, 1)
+        return chr(letter+ord('a'))
+
+
+
+    def shiftLeft(self, lista, numShifts):
+        return lista[numShifts:] + lista[:numShifts]
+
+    def groups(self, cipherText, key_length):
+        frequencies = []
+        for i in range(key_length):
+            frequencies.append([0]*26)
+
+
+        for i in range(len(cipherText)):
+            if cipherText[i].isalpha():
+                frequencies[i%key_length][ord(cipherText[i])-ord('a')] += 1
+
+
+        for i in range(key_length):
+            for j in range(26):
+                frequencies[i][j] /= 26
+        
    
-        return totalList.index(max(totalList))
-
-            
-
-    def make_percentages(self, cipherText, keyLength, keyGuess):
-        alphabet = string.ascii_uppercase
-        frequencies = {character:0 for character in alphabet}
-
-        # Contamos as frequencias em "Batches" de tamanho keyGuess
-        for x in range(len(cipherText)):
-            if x % keyGuess == keyLength:
-                if cipherText[x] in alphabet:
-                    frequencies[cipherText[x]] += 1 
-
-        percentages = []
-
-        for character in alphabet:
-            percentages.append(frequencies[character]/len(cipherText))
-        return percentages
+        return frequencies
+        
 
     def find_matchings(self, cipherText):
         matching_numbers = []
@@ -103,7 +125,7 @@ class Attack:
             match_count = 0
             temp = i
             for j in range(len(cipherText)):
-                if cipherText[j] == cipherText[temp] and cipherText[j] != ' ' and cipherText[temp] != ' ':
+                if cipherText[j] == cipherText[temp] and cipherText[j].isalpha() and cipherText[temp].isalpha():
                     match_count += 1
                 temp += 1
                 if temp >= len(cipherText):
@@ -115,21 +137,19 @@ class Attack:
 
 
 
-c = Cipher()
+
 a = Attack()
 
 
-#ciphered_text = "CVJTNAFENMCDMKBXFSTKLHGSOJWHOFUISFYFBEXEINFIMAYSSDYYIJNPWTOKFRHWVWTZFXHLUYUMSGVDURBWBIVXFAFMYFYXPIGBHWIFHHOJBEXAUNFIYLJWDKNHGAOVBHHGVINAULZFOFUQCVFBYNFTYGMMSVGXCFZFOKQATUIFUFERQTEWZFOKMWOJYLNZBKSHOEBPNAYTFKNXLBVUAXCXUYYKYTFRHRCFUYCLUKTVGUFQBESWYSSWLBYFEFZVUWTRLLNGIZGBMSZKBTNTSLNNMDPMYMIUBVMTLOBJHHFWTJNAUFIZMBZLIVHMBSUWLBYFEUYFUFENBRVJVKOLLGTVUZUAOJNVUWTRLMBATZMFSSOJQXLFPKNAULJCIOYVDRYLUJMVMLVMUKBTNAMFPXXJPDYFIJFYUWSGVIUMBWSTUXMSSNYKYDJMCGASOUXBYSMCMEUNFJNAUFUYUMWSFJUKQWSVXXUVUFFBPWBCFYLWFDYGUKDRYLUJMFPXXEFZQXYHGFLACEBJBXQSTWIKNMORNXCJFAIBWWBKCMUKIVQTMNBCCTHLJYIGIMSYCFVMURMAYOBJUFVAUZINMATCYPBANKBXLWJJNXUJTWIKBATCIOYBPPZHLZJJZHLLVEYAIFPLLYIJIZMOUDPLLTHVEVUMBXPIBBMSNSCMCGONBHCKIVLXMGCRMXNZBKQHODESYTVGOUGTHAGRHRMHFREYIJIZGAUNFZIYZWOUYWQZPZMAYJFJIKOVFKBTNOPLFWHGUSYTLGNRHBZSOPMIYSLWIKBANYUOYAPWZXHVFUQAIATYYKYKPMCEYLIRNPCDMEIMFGWVBBMUPLHMLQJWUGSKQVUDZGSYCFBSWVCHZXFEXXXAQROLYXPIUKYHMPNAYFOFHXBSWVCHZXFEXXXAIRPXXGOVHHGGSVNHWSFJUKNZBESHOKIRFEXGUFVKOLVJNAYIVVMMCGOFZACKEVUMBATVHKIDMVXBHLIVWTJAUFFACKHCIKSFPKYQNWOLUMYVXYYKYAOYYPUKXFLMBQOFLACKPWZXHUFJYGZGSTYWZGSNBBWZIVMNZXFIYWXWBKBAYJFTIFYKIZMUIVZDINLFFUVRGSSBUGNGOPQAILIFOZBZFYUWHGIRHWCFIZMWYSUYMAUDMIYVYAWVNAYTFEYYCLPWBBMVZZHZUHMRWXCFUYYVIENFHPYSMKBTMOIZWAIXZFOLBSMCHHNOJKBMBATZXXJSSKNAULBJCLFWXDSUYKUCIOYJGFLMBWHFIWIXSFGXCZBMYMBWTRGXXSHXYKZGSDSLYDGNBXHAUJBTFDQCYTMWNPWHOFUISMIFFVXFSVFRNA"
+ciphered_text = "CVJTNAFENMCDMKBXFSTKLHGSOJWHOFUISFYFBEXEINFIMAYSSDYYIJNPWTOKFRHWVWTZFXHLUYUMSGVDURBWBIVXFAFMYFYXPIGBHWIFHHOJBEXAUNFIYLJWDKNHGAOVBHHGVINAULZFOFUQCVFBYNFTYGMMSVGXCFZFOKQATUIFUFERQTEWZFOKMWOJYLNZBKSHOEBPNAYTFKNXLBVUAXCXUYYKYTFRHRCFUYCLUKTVGUFQBESWYSSWLBYFEFZVUWTRLLNGIZGBMSZKBTNTSLNNMDPMYMIUBVMTLOBJHHFWTJNAUFIZMBZLIVHMBSUWLBYFEUYFUFENBRVJVKOLLGTVUZUAOJNVUWTRLMBATZMFSSOJQXLFPKNAULJCIOYVDRYLUJMVMLVMUKBTNAMFPXXJPDYFIJFYUWSGVIUMBWSTUXMSSNYKYDJMCGASOUXBYSMCMEUNFJNAUFUYUMWSFJUKQWSVXXUVUFFBPWBCFYLWFDYGUKDRYLUJMFPXXEFZQXYHGFLACEBJBXQSTWIKNMORNXCJFAIBWWBKCMUKIVQTMNBCCTHLJYIGIMSYCFVMURMAYOBJUFVAUZINMATCYPBANKBXLWJJNXUJTWIKBATCIOYBPPZHLZJJZHLLVEYAIFPLLYIJIZMOUDPLLTHVEVUMBXPIBBMSNSCMCGONBHCKIVLXMGCRMXNZBKQHODESYTVGOUGTHAGRHRMHFREYIJIZGAUNFZIYZWOUYWQZPZMAYJFJIKOVFKBTNOPLFWHGUSYTLGNRHBZSOPMIYSLWIKBANYUOYAPWZXHVFUQAIATYYKYKPMCEYLIRNPCDMEIMFGWVBBMUPLHMLQJWUGSKQVUDZGSYCFBSWVCHZXFEXXXAQROLYXPIUKYHMPNAYFOFHXBSWVCHZXFEXXXAIRPXXGOVHHGGSVNHWSFJUKNZBESHOKIRFEXGUFVKOLVJNAYIVVMMCGOFZACKEVUMBATVHKIDMVXBHLIVWTJAUFFACKHCIKSFPKYQNWOLUMYVXYYKYAOYYPUKXFLMBQOFLACKPWZXHUFJYGZGSTYWZGSNBBWZIVMNZXFIYWXWBKBAYJFTIFYKIZMUIVZDINLFFUVRGSSBUGNGOPQAILIFOZBZFYUWHGIRHWCFIZMWYSUYMAUDMIYVYAWVNAYTFEYYCLPWBBMVZZHZUHMRWXCFUYYVIENFHPYSMKBTMOIZWAIXZFOLBSMCHHNOJKBMBATZXXJSSKNAULBJCLFWXDSUYKUCIOYJGFLMBWHFIWIXSFGXCZBMYMBWTRGXXSHXYKZGSDSLYDGNBXHAUJBTFDQCYTMWNPWHOFUISMIFFVXFSVFRNA"
 
 lista = []
-with open('entrada.txt') as f:
+with open('entrada3.txt') as f:
     lista = f.readlines()
 
 teste = ""
 for s in lista:
     teste += s
+
 a.breakCiphertext(teste, 'en')
 
-
-
-# a.breakCiphertext(teste, 'en')
