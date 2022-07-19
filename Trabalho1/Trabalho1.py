@@ -38,7 +38,7 @@ def main():
             message = input()
 
         if option == 1 or option == 2:
-            print("Insert the key:", end='')
+            print("Insert the key: ", end='')
             key = input()
 
             if option == 1:
