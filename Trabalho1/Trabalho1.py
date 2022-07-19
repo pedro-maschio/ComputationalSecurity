@@ -15,6 +15,7 @@ def readFile(filename):
 def main():
     c = Cipher()
     a = Attack()
+    
     while True:
         print("CIPHER PROGRAM")
 
