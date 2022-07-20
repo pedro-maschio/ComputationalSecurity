@@ -27,16 +27,17 @@ def main():
     
         option = int(input())
 
-        print('Read from file or from stdin (1 for file, 2 for stdin): ', end='')
-        read_option = int(input())
+        if option != 4:
+            print('Read from file or from stdin (1 for file, 2 for stdin): ', end='')
+            read_option = int(input())
 
-        if(read_option == 1):
-            print('Insert the filename: ', end ='')
-            filename = input()
-            message = readFile(filename)
-        else:
-            print('Insert the message: ')
-            message = input()
+            if(read_option == 1):
+                print('Insert the filename: ', end ='')
+                filename = input()
+                message = readFile(filename)
+            else:
+                print('Insert the message: ')
+                message = input()
 
         if option == 1 or option == 2:
             print("Insert the key: ", end='')

@@ -5,10 +5,10 @@ class Attack:
     def breakCiphertext(self, cipherText, language='pt-BR', key_len=None):
         cipherTextTemp = cipherText
         cipherText = ''.join(character.lower() for character in cipherText if (character.isascii() and character.isalpha()))
-        matchingsList = self.find_matchings(cipherText) # 10 is the max key length we are considering
+        matchingsList = self.find_matchings(cipherText) 
 
         if key_len == None:
-            key_len =  matchingsList.index(max(matchingsList[:10]))+1 # max key len is 10
+            key_len =  matchingsList.index(max(matchingsList[:10]))+1 # 10 is the max key length we are considering
         testGroups = self.groups(cipherText, key_len)
         key = self.frequency_analysis(testGroups, language)
         
