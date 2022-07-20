@@ -5,7 +5,6 @@ class Cipher:
         key_length = len(key)
         message = ''.join(character.lower() for character in message if character.isascii())
         key = key.lower()
-   
 
         if message_length <= 0 or key_length <= 0 or message_length < key_length:
             return "NULL_MSG"

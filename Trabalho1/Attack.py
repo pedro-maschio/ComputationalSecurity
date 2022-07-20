@@ -31,8 +31,8 @@ class Attack:
 
         key = ""
         for i in range(key_len):
-            max = self.get_max_frequency_letter(baseFrequencies, groupFrequencies[i])
-            key += max
+            letter = self.get_max_frequency_letter(baseFrequencies, groupFrequencies[i])
+            key += letter
         return key
 
     def get_max_frequency_letter(self, baseFrequencies, frequencies):
@@ -60,17 +60,15 @@ class Attack:
         for i in range(key_length):
             frequencies.append([0]*26)
 
-
         for i in range(len(cipherText)):
             if cipherText[i].isalpha():
                 frequencies[i%key_length][ord(cipherText[i])-ord('a')] += 1
 
-
+        
         for i in range(key_length):
             for j in range(26):
                 frequencies[i][j] /= 26
         
-   
         return frequencies
         
 
