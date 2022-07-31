@@ -61,7 +61,7 @@ def main():
             else:
                 language = 'en'
 
-            result = a.breakCiphertext(message, language)
+            result = a.break_ciphertext(message, language)
 
             print("\n\nKEY: " + result['key'])
             print("MESSAGE: " + result['message'] + "\n\n")
@@ -73,7 +73,7 @@ def main():
                 print('Choose a key length: ', end='')
                 key_l = int(input())
 
-                result = a.breakCiphertext(message, language, key_l)
+                result = a.break_ciphertext(message, language, key_l)
 
                 print("\n\nKEY: " + result['key'])
                 print("MESSAGE: " + result['message'] + "\n\n")
