@@ -47,12 +47,12 @@ class Attack:
                 prev_max = res 
                 letter = i
 
-            frequencies = self.shiftLeft(frequencies, 1)
+            frequencies = self.shift_left(frequencies, 1)
         return chr(letter+ord('a'))
 
 
 
-    def shiftLeft(self, lista, numShifts):
+    def shift_left(self, lista, numShifts):
         return lista[numShifts:] + lista[:numShifts]
 
     def groups(self, cipherText, key_length):
@@ -64,7 +64,6 @@ class Attack:
             if cipherText[i].isalpha():
                 frequencies[i%key_length][ord(cipherText[i])-ord('a')] += 1
 
-        
         for i in range(key_length):
             for j in range(26):
                 frequencies[i][j] /= 26

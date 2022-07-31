@@ -26,7 +26,6 @@ class Cipher:
                     ciphered_character = chr((caracter_ord - (ord(key[(i-num_special)%len(key)]) - ord('a')))%26 + ord('a'))
                 else:
                     special_character = True
-            
 
             if not special_character:
                 cipher_text += ciphered_character
@@ -35,3 +34,7 @@ class Cipher:
                 cipher_text += message[i]
 
         return cipher_text
+
+
+
+        
