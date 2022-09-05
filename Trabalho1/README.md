@@ -1,4 +1,4 @@
-# Trabalho 1 - Segurança Computacional
+# Vigenère Cipher Breaker
 
 Para a execução do Trabalho 1, basta abrir um terminal na pasta que contém os arquivos e executar o comando:
 
