@@ -1,5 +1,5 @@
-from aes import AES
-from key import Key 
+from aes.aes import AES
+from rsa.key import Key 
 
 key = Key()
 
