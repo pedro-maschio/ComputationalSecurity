@@ -1,34 +1,71 @@
 # Base implementation: https://blog.nindalf.com/posts/implementing-aes/
 # https://github.com/boppreh/aes/blob/master/aes.py
 import random
-from aes.constants import Constants 
+from constants import Constants
+from utils import convert_key, generate_key
+
 dice = random.SystemRandom()
 
 
 class AES:
 
-
-    def generate_key(self):
-        self.key = dice.getrandbits(128)
-
-
-
+    ''' Initialize the AES object with the given key'''
+    def __init__(self, key, message, rounds=10):
+        self.rounds = rounds
+        self.round_keys = self.__expand_key(key)
         
+        
+
+    '''
+        Receives a 4x4-byte matrix (the key)
+        and returns a list of matrices
+    '''
+    def __expand_key(self, key):
+        key_columns = convert_key(key) 
+        
+        iteration_size = len(key) // 4 # 4 words for AES-128 (this one), 6 words for AES-192, and 8 words for AES-256. word = 32 bits
+        
+        i = 1
+        
+        while len(key_columns) < (self.rounds + 1) * 4:
+            word = list(key_columns[-1])
+            
+            if len(key_columns) % iteration_size == 0: # perform the operation at every 'row'
+                word.append(word.pop(0)) # left shift
+               
+                word = [Constants.sbox[b] for b in word] # amp through s box
+
+                # we only XOR the first byte, other bytes of rcon are all 0
+                word[0] ^= Constants.r_con[i]
+                
+                i += 1
+            elif len(key) == 32 and len(key_columns) % iteration_size == 4:
+                # Run word through S-box in the fourth iteration when using a
+                # 256-bit key.
+                word = [Constants.sbox[b] for b in word]
+
+            word = bytes(x^y for x, y in zip(word, key_columns[-iteration_size]))
+            
+            
+            key_columns.append(word)
+        retorno = [key_columns[4*i : 4*(i+1)] for i in range(len(key_columns) // 4)]
+        print(retorno)
+        return retorno
+
+
     def encrypt(self, state, expkey, rounds=10):
         keyi = 0
         state = self.add_key(state, expkey[keyi:keyi+4])
         keyi += 4
 
-        for i in range(rounds):
+        for i in range(rounds-1): 
             state = self.sub_bytes(state)
             state = self.shift_rows(state)
-            state = self.mix_cols(state)
+            
+            if i != rounds-1: # the last round doesn't have mix_cols step
+                state = self.mix_cols(state)
             state = self.add_key(state, expkey[keyi:keyi+4]) # we use only 16 bytes from the key expansion
             keyi += 4
-
-        state = self.sub_bytes(state)
-        state = self.shift_rows(state)
-        state = self.add_key(state, expkey[keyi:keyi+4])
 
     '''
         Receives the sate and XOR it against the key
@@ -60,23 +97,23 @@ class AES:
 
     def shift_rows(self, state: bytes):
         for i in range(1, 4):
-            state[i] = self.shift_left(state[i], i)
+            state[i] = self.__shift_left(state[i], i)
         return state
 
     def inverse_shift_rows(self, state: bytes):
         for i in range(1, 4):
-            state[i] = self.shift_right(state[i], i)
+            state[i] = self.__shift_right(state[i], i)
         return state
 
-    def shift_left(self, state_row, shifts):
+    def __shift_left(self, state_row, shifts):
         return state_row[shifts:] + state_row[:shifts]
 
-    def shift_right(self, state_row, shifts):
+    def __shift_right(self, state_row, shifts):
         return state_row[-shifts:] + state_row[:-shifts]
 
 
     '''
-        For each column, apply the galois multiplication accordingly
+        A column-wise operation that involves multiplication and addition in the galois field
     '''
     def mix_cols(self, state):
         for i in range(4):
