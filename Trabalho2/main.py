@@ -1,10 +1,15 @@
 from aes import AES
 import random as random
+import os 
 dice = random.SystemRandom()
 
-key = b'2b7e151628aed2a6abf7158809cf4f3c'
-aes = AES(key, 'teste')
 
+
+key = b'2b7e151628aed2a6abf7158809cf4f3c'
+iv = b'\xe5\xc8!\x8e@\xc6\xc3\xf2FH)s\xed{\x0f\x12'
+encrypted_text = AES(key).encrypt_ctr(b'00112233445566778899aabbccddeeff', iv)
+
+print(AES(key).decrypt_ctr(encrypted_text, iv))
 
 
 # while True:

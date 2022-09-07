@@ -20,3 +20,12 @@ Parte IV: Verificação:
 formatação usada, no caso BASE64)
 - [ ] Decifração da assinatura (decifração do hash)
 - [ ] Verificação (cálculo e comparação do hash do arquivo)
+
+
+A pontuação máxima será conferida aos trabalhos que realmente implementarem as 
+seguintes primitivas: 
+a.  geração de chaves com teste de primalidade (Miller-Rabin) 
+b.  geração de chave e cifração AES 
+c.  cifração e decifração RSA com OAEP 
+d.  formatação/parsing 
+e.  AES modo CTR 

@@ -18,6 +18,6 @@ def generate_key():
 '''
     Convert the key (16-byte array) to a 4x4 byte matrix
 '''
-def convert_key(key):
+def byte_array_to_matrice(key):
     return [list(key[i:i+4]) for i in range(0, len(key), 4)]
 

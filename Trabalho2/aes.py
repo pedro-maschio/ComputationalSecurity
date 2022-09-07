@@ -1,8 +1,9 @@
 # Base implementation: https://blog.nindalf.com/posts/implementing-aes/
 # https://github.com/boppreh/aes/blob/master/aes.py
+from pydoc import plain
 import random
 from constants import Constants
-from utils import convert_key, generate_key
+from utils import byte_array_to_matrice, generate_key, byte_array_to_matrice
 
 dice = random.SystemRandom()
 
@@ -10,10 +11,9 @@ dice = random.SystemRandom()
 class AES:
 
     ''' Initialize the AES object with the given key'''
-    def __init__(self, key, message, rounds=10):
+    def __init__(self, key, rounds=10):
         self.rounds = rounds
-        self.round_keys = self.__expand_key(key)
-        
+        self.key_matrices = self.__expand_key(key)
         
 
     '''
@@ -21,7 +21,7 @@ class AES:
         and returns a list of matrices
     '''
     def __expand_key(self, key):
-        key_columns = convert_key(key) 
+        key_columns = byte_array_to_matrice(key) 
         
         iteration_size = len(key) // 4 # 4 words for AES-128 (this one), 6 words for AES-192, and 8 words for AES-256. word = 32 bits
         
@@ -33,39 +33,96 @@ class AES:
             if len(key_columns) % iteration_size == 0: # perform the operation at every 'row'
                 word.append(word.pop(0)) # left shift
                
-                word = [Constants.sbox[b] for b in word] # amp through s box
+                word = [Constants.sbox[b] for b in word] # pass through s box
 
                 # we only XOR the first byte, other bytes of rcon are all 0
                 word[0] ^= Constants.r_con[i]
                 
                 i += 1
             elif len(key) == 32 and len(key_columns) % iteration_size == 4:
-                # Run word through S-box in the fourth iteration when using a
-                # 256-bit key.
                 word = [Constants.sbox[b] for b in word]
 
             word = bytes(x^y for x, y in zip(word, key_columns[-iteration_size]))
-            
-            
             key_columns.append(word)
+
         retorno = [key_columns[4*i : 4*(i+1)] for i in range(len(key_columns) // 4)]
-        print(retorno)
+        
         return retorno
 
 
-    def encrypt(self, state, expkey, rounds=10):
+    '''
+        Encrypt a single block of 16-byte plaintext and return a 16-byte array
+    '''
+    def encrypt(self, plaintext):
         keyi = 0
-        state = self.add_key(state, expkey[keyi:keyi+4])
-        keyi += 4
 
-        for i in range(rounds-1): 
-            state = self.sub_bytes(state)
-            state = self.shift_rows(state)
-            
-            if i != rounds-1: # the last round doesn't have mix_cols step
-                state = self.mix_cols(state)
-            state = self.add_key(state, expkey[keyi:keyi+4]) # we use only 16 bytes from the key expansion
+        plaintext = byte_array_to_matrice(plaintext)
+        
+        plaintext = self.add_key(plaintext, self.key_matrices[0])
+        keyi += 4
+        
+   
+        for i in range(1, self.rounds): 
+            plaintext = self.sub_bytes(plaintext)
+            plaintext = self.shift_rows(plaintext)
+            if i != self.rounds-1: # the last round doesn't have mix_cols step
+                plaintext = self.mix_cols(plaintext)
+            plaintext = self.add_key(plaintext, self.key_matrices[i]) # we use only 16 bytes from the key expansion
             keyi += 4
+            
+        
+        return bytes(sum(plaintext, [])) # converts the 4x4 matrix to 16-byte array
+
+    def divide_in_blocks(self, plaintext, block_size=16):
+        retorno = [plaintext[i:i+16] for i in range(0, len(plaintext), block_size)] # we could have problems if assert len(plaintext) % block_size == 0  is not True
+        
+        return retorno
+
+    def increment_iv(self, iv):
+        saida = list(iv)
+
+        for i in reversed(range(len(saida))):
+            if saida[i] == 0xFF:
+                saida[i] = 0 # we can't increment more than FF
+            else:
+                saida[i] += 1
+                break 
+        return bytes(saida)
+
+    def xor_bytes(self, a, b):
+        """ Returns a new byte array with the elements xor'ed. """
+        return bytes(i^j for i, j in zip(a, b))
+
+
+    #  https://www.gurutechnologies.net/blog/aes-ctr-encryption-in-c/
+    def encrypt_ctr(self, plaintext, iv):
+        
+        blocks = []
+        temp = iv 
+
+        for block in self.divide_in_blocks(plaintext):
+            # In CTR mode encrypt we XOR the block message with Initializing Vector (iv)
+           
+            blk = self.xor_bytes(block, self.encrypt(temp))
+            blocks.append(blk)
+            temp = self.increment_iv(temp)
+        return b''.join(blocks)
+
+    '''
+        Decrypts in CTR mode, it is the same as encryption
+    '''
+    def decrypt_ctr(self, ciphertext, iv):
+        
+        blocks = []
+        temp = iv 
+
+        for block in self.divide_in_blocks(ciphertext):
+            # In CTR mode encrypt we XOR the block message with Initializing Vector (iv)
+            blk = self.xor_bytes(block, self.encrypt(temp))
+            blocks.append(blk)
+            temp = self.increment_iv(temp)
+        return b''.join(blocks)
+
 
     '''
         Receives the sate and XOR it against the key
@@ -74,7 +131,7 @@ class AES:
         for i in range(4):
             for j in range(4):
                 state[i][j] ^= key[i][j]
-        
+        return state
 
     '''
         Substitutes the bytes from the state by the respective byte from 
