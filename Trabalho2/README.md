@@ -6,8 +6,8 @@ Parte I: Geração de chaves
 - [x] Geração de chaves (p e q primos com no mínimo de 1024 bits)
 
 Parte II: Cifra simétrica
-- [ ] Geração de chaves simétrica
-- [ ] Cifração simétrica de mensagem (AES modo CTR),
+- [x] Geração de chaves simétrica
+- [x] Cifração simétrica de mensagem (AES modo CTR),
 
 Parte III: Geração da assinatura
 - [ ] Cálculo de hashes da mensagem em claro (função de hash SHA-3)

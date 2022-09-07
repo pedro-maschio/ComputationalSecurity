@@ -60,7 +60,6 @@ class AES:
         
         plaintext = self.add_key(plaintext, self.key_matrices[0])
         keyi += 4
-        
    
         for i in range(1, self.rounds): 
             plaintext = self.sub_bytes(plaintext)
@@ -74,6 +73,11 @@ class AES:
         return bytes(sum(plaintext, [])) # converts the 4x4 matrix to 16-byte array
 
     def divide_in_blocks(self, plaintext, block_size=16):
+        while len(plaintext) % block_size != 0:
+            # PKCS#7: we fill the last n blocks with n bytes of value n https://stackoverflow.com/questions/13572253/what-kind-of-padding-should-aes-use
+            padding_len = (16 - (len(plaintext) % 16))
+            padding = bytes([padding_len] * padding_len)
+            plaintext = plaintext + padding
         retorno = [plaintext[i:i+16] for i in range(0, len(plaintext), block_size)] # we could have problems if assert len(plaintext) % block_size == 0  is not True
         
         return retorno
