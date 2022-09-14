@@ -21,3 +21,6 @@ def generate_key():
 def byte_array_to_matrice(key):
     return [list(key[i:i+4]) for i in range(0, len(key), 4)]
 
+def bytes_xor(a, b):
+    return bytes(x ^ y for x, y in zip(a, b))
+

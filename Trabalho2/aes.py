@@ -10,6 +10,7 @@ dice = random.SystemRandom()
 
 class AES:
 
+
     ''' Initialize the AES object with the given key'''
     def __init__(self, key, rounds=10):
         self.rounds = rounds
@@ -78,7 +79,7 @@ class AES:
             padding_len = (16 - (len(plaintext) % 16))
             padding = bytes([padding_len] * padding_len)
             plaintext = plaintext + padding
-        retorno = [plaintext[i:i+16] for i in range(0, len(plaintext), block_size)] # we could have problems if assert len(plaintext) % block_size == 0  is not True
+        retorno = [plaintext[i:i+16] for i in range(0, len(plaintext), block_size)] 
         
         return retorno
 

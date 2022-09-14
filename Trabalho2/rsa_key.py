@@ -19,6 +19,8 @@ def single_test(n, a):
     return False 
 
 def is_prime(n, r=64):
+    if n % 2 == 0:
+        return False
     
     for i in range(r):
         a = dice.randrange(2, n-2)
