@@ -63,14 +63,17 @@ aes_ciphered_key = pedro.oaep_cipher(key, gabigue.public_key)
 
 print("aes_ciphered_key")
 print(aes_ciphered_key.to_bytes(aes_ciphered_key.bit_length(), 'big'))
+print("aes_ciphered_key.bit_length()="+str(aes_ciphered_key.bit_length()))
 
 
 aes_de_oaep_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
-print("aes_de_oaep_key")
+print('aes_de_oaep_key: ', end='')
 print(aes_de_oaep_key)
-aes_deciphered_key = gabigue.oaep_decipher(aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length(), 'big'))
+print("aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length(), 'big': ", end='')
+print(aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length(), 'big'))
+aes_deciphered_key = gabigue.oaep_decipher(aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length()//8 + 1 if aes_ciphered_key.bit_length()%8 else 0, 'big'))
 print("AES DECIPHERED")
-print(int.from_bytes(aes_deciphered_key, 'big'))
+print(hex(int.from_bytes(aes_deciphered_key, 'big')))
 
 
 
@@ -80,22 +83,22 @@ print(int.from_bytes(aes_deciphered_key, 'big'))
 
 
 
-aes_ciphered_key = pedro.cipher_or_decipher(int.from_bytes(key, 'big'), gabigue.public_key)
-print("AES KEY CIPHERED")
-print(hex(aes_ciphered_key))
+# aes_ciphered_key = pedro.cipher_or_decipher(int.from_bytes(key, 'big'), gabigue.public_key)
+# print("AES KEY CIPHERED")
+# print(hex(aes_ciphered_key))
 
-file_ciphered_hash = pedro.cipher_or_decipher(int.from_bytes(file_hash.digest(), 'big'), gabigue.public_key)
-print("FILE HASH CIPHERED")
-print(hex(file_ciphered_hash))
+# file_ciphered_hash = pedro.cipher_or_decipher(int.from_bytes(file_hash.digest(), 'big'), gabigue.public_key)
+# print("FILE HASH CIPHERED")
+# print(hex(file_ciphered_hash))
 
 
-aes_deciphered_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
-print("AES KEY DECIPHERED")
-print(hex(aes_deciphered_key))
+# aes_deciphered_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
+# print("AES KEY DECIPHERED")
+# print(hex(aes_deciphered_key))
 
-file_deciphered_hash = gabigue.cipher_or_decipher(file_ciphered_hash, gabigue.private_key)
-print("FILE HASH DECIPHERED")
-print(hex(file_deciphered_hash))
+# file_deciphered_hash = gabigue.cipher_or_decipher(file_ciphered_hash, gabigue.private_key)
+# print("FILE HASH DECIPHERED")
+# print(hex(file_deciphered_hash))
 
 
 

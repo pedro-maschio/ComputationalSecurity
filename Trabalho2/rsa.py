@@ -70,7 +70,7 @@ class RSA:
         # print('em: ', end = '')
         # print(em)
         # em bate, não sei o cipher_decipher
-        return self.cipher_or_decipher(int.from_bytes((0).to_bytes(1, 'big') + maskedSeed + maskedDb, 'big'), key)
+        return self.cipher_or_decipher(int.from_bytes(em, 'big'), key)
 
     # https://www.rfc-editor.org/rfc/rfc8017#section-7.1.2
     def oaep_decipher(self, ciphertext: bytes, label: str = "") -> bytes:
