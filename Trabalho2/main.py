@@ -1,7 +1,9 @@
 import base64
 import hashlib
+from math import ceil
 from aes import AES
 import random as random
+import struct
 import os
 from rsa import RSA 
 dice = random.SystemRandom()
@@ -27,24 +29,76 @@ aes_key = dice.getrandbits(128)
 
 print("Plaintext: " + plaintext)
 plaintext = bytes(plaintext, 'utf-8')
-print('AES key: ' + hex(aes_key))
+
 key = aes_key.to_bytes(16, 'big')
+key = b'\x16&g\xd3\x10\x7f\xf1r2\xe6}\x8ca\x97\xbc#'
+print('AES key: ' + hex(int.from_bytes(key, 'big')))
 
 file_hash = hashlib.sha3_256(plaintext)
 print('File hash: ' + file_hash.hexdigest())
 
 aes = AES(key)
 
-encrypted_file = base64.b64encode(aes.encrypt_ctr(plaintext, iv))
+
+# This works
+# encrypted_file = aes.encrypt_ctr(plaintext, iv)
+# print('encrypted_file')
+# print(encrypted_file)
+
+# de = aes.decrypt_ctr(encrypted_file, iv)
+# print('decrypted_file')
+# print(de)
+
+
+
+
+
+
+
+print("aes_key")
+aes_key = int.from_bytes(key, 'big')
+print(aes_key)
+
+aes_ciphered_key = pedro.oaep_cipher(key, gabigue.public_key)
+
+print("aes_ciphered_key")
+print(aes_ciphered_key.to_bytes(aes_ciphered_key.bit_length(), 'big'))
+
+
+aes_de_oaep_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
+print("aes_de_oaep_key")
+print(aes_de_oaep_key)
+aes_deciphered_key = gabigue.oaep_decipher(aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length(), 'big'))
+print("AES DECIPHERED")
+print(int.from_bytes(aes_deciphered_key, 'big'))
+
+
+
+
+
+
+
+
 
 aes_ciphered_key = pedro.cipher_or_decipher(int.from_bytes(key, 'big'), gabigue.public_key)
-
-print("AES CIPHERED")
+print("AES KEY CIPHERED")
 print(hex(aes_ciphered_key))
 
-#aes_deciphered_key = gabigue.cipher_or_decipher(gabigue.oaep_decipher(aes_ciphered_key.to_bytes(16, 'big')), gabigue.private_key)
-aes_ciphered_key.to_bytes(length=(min(aes_ciphered_key.bit_length(), 1) + 7), byteorder='big')
-#print(hex(aes_deciphered_key))
+file_ciphered_hash = pedro.cipher_or_decipher(int.from_bytes(file_hash.digest(), 'big'), gabigue.public_key)
+print("FILE HASH CIPHERED")
+print(hex(file_ciphered_hash))
+
+
+aes_deciphered_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
+print("AES KEY DECIPHERED")
+print(hex(aes_deciphered_key))
+
+file_deciphered_hash = gabigue.cipher_or_decipher(file_ciphered_hash, gabigue.private_key)
+print("FILE HASH DECIPHERED")
+print(hex(file_deciphered_hash))
+
+
+
 
 
 
