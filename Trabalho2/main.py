@@ -30,8 +30,9 @@ aes_key = dice.getrandbits(128)
 print("Plaintext: " + plaintext)
 plaintext = bytes(plaintext, 'utf-8')
 
+#aes_key = 340282366920938463463374607431768211455 (this is the largest integer we can represent with 128 bits, i was trying to break our code)
 key = aes_key.to_bytes(16, 'big')
-key = b'\x16&g\xd3\x10\x7f\xf1r2\xe6}\x8ca\x97\xbc#'
+
 print('AES key: ' + hex(int.from_bytes(key, 'big')))
 
 file_hash = hashlib.sha3_256(plaintext)
@@ -52,25 +53,15 @@ aes = AES(key)
 
 
 
-
-
-
-print("aes_key")
-aes_key = int.from_bytes(key, 'big')
-print(aes_key)
-
 aes_ciphered_key = pedro.oaep_cipher(key, gabigue.public_key)
 
-print("aes_ciphered_key")
-print(aes_ciphered_key.to_bytes(aes_ciphered_key.bit_length(), 'big'))
-print("aes_ciphered_key.bit_length()="+str(aes_ciphered_key.bit_length()))
-
-
 aes_de_oaep_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
-print('aes_de_oaep_key: ', end='')
-print(aes_de_oaep_key)
-print("aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length(), 'big': ", end='')
-print(aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length(), 'big'))
+
+print("AES CIPHERED")
+print(hex(aes_de_oaep_key))
+
+# to_bytes recebe como parâmetro a quantidade de bytes, caso o bit_length (número de bits) não seja múltiplo de oito
+# precisamos colocar esse último(s) bits em um byte a parte
 aes_deciphered_key = gabigue.oaep_decipher(aes_de_oaep_key.to_bytes(aes_ciphered_key.bit_length()//8 + 1 if aes_ciphered_key.bit_length()%8 else 0, 'big'))
 print("AES DECIPHERED")
 print(hex(int.from_bytes(aes_deciphered_key, 'big')))

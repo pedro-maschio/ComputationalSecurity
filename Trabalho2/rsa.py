@@ -58,8 +58,8 @@ class RSA:
 
         db = lHash + paddingString + (1).to_bytes(1, 'big') + message
 
-        #seed = dice.getrandbits(256).to_bytes(hLen, 'big')
-        seed = b'\xc8\x04S\xb7\xa4[|/\x9c\xd6\xc5a\x0ftL\xdb\xcf#\x920n\xe6T}\xff\xad-ku/\x0c\x1a'
+        seed = dice.getrandbits(256).to_bytes(hLen, 'big')
+        #seed = b'\xc8\x04S\xb7\xa4[|/\x9c\xd6\xc5a\x0ftL\xdb\xcf#\x920n\xe6T}\xff\xad-ku/\x0c\x1a'
         dbMask = self.mgf1(seed, k - hLen - 1)
         maskedDb = bytes_xor(db, dbMask)
         seedMask = self.mgf1(maskedDb, hLen)
@@ -67,9 +67,7 @@ class RSA:
 
 
         em = (0).to_bytes(1, "big") + maskedSeed + maskedDb
-        # print('em: ', end = '')
-        # print(em)
-        # em bate, não sei o cipher_decipher
+
         return self.cipher_or_decipher(int.from_bytes(em, 'big'), key)
 
     # https://www.rfc-editor.org/rfc/rfc8017#section-7.1.2
@@ -81,19 +79,13 @@ class RSA:
             return "decryption error"
 
         em = ciphertext
-        print('em: ', end='')
-        print(em)
         Y = em[0]
         maskedSeed = em[1: hLen+1]
-        print('maskedSeed: ', end='')
-        print(maskedSeed)
         maskedDB = em[-(k-hLen-1):]
         seedMask = self.mgf1(maskedDB, hLen)
         seed = bytes_xor(maskedSeed, seedMask)
         dbMask = self.mgf1(seed, k - hLen - 1)
         db = bytes_xor(maskedDB, dbMask)
-        print('db: ', end='')
-        print(db)
         lHash = db[:hLen]
 
         idx = 0
@@ -102,8 +94,6 @@ class RSA:
             if i == 1:
                 break 
             idx += 1
-        print('message: ', end='')
-        print(padd[idx+1:])
         return padd[idx+1:]
 
 
