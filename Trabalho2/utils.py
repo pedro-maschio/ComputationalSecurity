@@ -24,3 +24,12 @@ def byte_array_to_matrice(key):
 def bytes_xor(a, b):
     return bytes(x ^ y for x, y in zip(a, b))
 
+
+def calc_num_bytes(n: int):
+    cnt = 0 
+
+    while n != 0:
+        n >>= 8
+        cnt += 1
+    return cnt
+

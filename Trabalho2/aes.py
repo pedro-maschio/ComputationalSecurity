@@ -11,21 +11,20 @@ dice = random.SystemRandom()
 class AES:
 
 
-    ''' Initialize the AES object with the given key'''
+    ''' Inicializa o AES com a dada chave'''
     def __init__(self, key, rounds=10):
         self.rounds = rounds
-        self.key_matrices = self.__expand_key(key)
+        self.key_matrices = self.expand_key(key)
         
 
     '''
-        Receives a 4x4-byte matrix (the key)
-        and returns a list of matrices
+        Recebe a chave e a expande
     '''
-    def __expand_key(self, key):
+    def expand_key(self, key):
         key_columns = byte_array_to_matrice(key) 
-        
+        print(key_columns)
         iteration_size = len(key) // 4 # 4 words for AES-128 (this one), 6 words for AES-192, and 8 words for AES-256. word = 32 bits
-        
+        print("iteration size = " + str(iteration_size))
         i = 1
         
         while len(key_columns) < (self.rounds + 1) * 4:
@@ -52,7 +51,7 @@ class AES:
 
 
     '''
-        Encrypt a single block of 16-byte plaintext and return a 16-byte array
+        Criptografa um único bloco de 16 bytes de texto e retorna uma matriz 4-4.
     '''
     def encrypt(self, plaintext):
         keyi = 0
@@ -100,7 +99,7 @@ class AES:
 
 
     #  https://www.gurutechnologies.net/blog/aes-ctr-encryption-in-c/
-    def encrypt_ctr(self, plaintext, iv):
+    def encrypt_ctr(self, plaintext: bytes, iv: bytes):
         
         blocks = []
         temp = iv 
@@ -130,7 +129,7 @@ class AES:
 
 
     '''
-        Receives the sate and XOR it against the key
+        Recebe o estado e faz o XOR com a chave.
     '''
     def add_key(self, state: bytes, key):
         for i in range(4):
@@ -139,8 +138,7 @@ class AES:
         return state
 
     '''
-        Substitutes the bytes from the state by the respective byte from 
-        the S Box.
+        Substitui os bytes do estado atual pelos bytes da S box
     '''
     def sub_bytes(self, state):
         for i in range(4):
@@ -149,7 +147,7 @@ class AES:
         return state
 
     '''
-        Applies the invertion of the operation performed in sub_bytes
+        Aplica a operação de inversão 
     '''
     def inverse_sub_bytes(self, state: bytes):
         for i in range(4):
@@ -175,7 +173,7 @@ class AES:
 
 
     '''
-        A column-wise operation that involves multiplication and addition in the galois field
+        Uma operação feita nas colunas que envolve a multiplicação e adição no campo de Galois
     '''
     def mix_cols(self, state):
         for i in range(4):

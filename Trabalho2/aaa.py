@@ -1,3 +1,7 @@
-teste = [1, 2, 3, 4]
+idx = 0
+for i in range(10):
+    if i == 3:
+        break 
+    idx += 1
 
-print(teste[-2:])
+print(idx)

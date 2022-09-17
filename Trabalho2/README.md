@@ -10,7 +10,7 @@ Parte II: Cifra simétrica
 - [x] Cifração simétrica de mensagem (AES modo CTR),
 
 Parte III: Geração da assinatura
-- [ ] Cálculo de hashes da mensagem em claro (função de hash SHA-3)
+- [x] Cálculo de hashes da mensagem em claro (função de hash SHA-3)
 - [ ] Assinatura da mensagem (cifração do hash da mensagem usando OAEP)
 - [ ] Formatação do resultado (caracteres especiais e informações para verificação em
 BASE64)

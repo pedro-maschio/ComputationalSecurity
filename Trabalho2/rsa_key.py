@@ -23,7 +23,7 @@ def is_prime(n, r=64):
         return False
     
     for i in range(r):
-        a = dice.randrange(2, n-2)
+        a = dice.randrange(2, n-1)
 
         if not single_test(n, a):
             return False 

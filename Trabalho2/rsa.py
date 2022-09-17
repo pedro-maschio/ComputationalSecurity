@@ -19,14 +19,9 @@ class RSA:
         if(self.d < 0):
             self.d += self.phi
         
+        
         self.private_key = [self.n, self.d] 
         self.public_key = [self.n, self.e]
-    
-    # def generateE(self, phi):
-    #     while True:
-    #         possibleE = dice.randrange(3, phi)
-    #         if egcd(possibleE, phi)[0] == 1: # egcd[1] == gcd
-    #             return possibleE 
 
     def get_keys(self):
         p = get_key()
@@ -59,7 +54,6 @@ class RSA:
         db = lHash + paddingString + (1).to_bytes(1, 'big') + message
 
         seed = dice.getrandbits(256).to_bytes(hLen, 'big')
-        #seed = b'\xc8\x04S\xb7\xa4[|/\x9c\xd6\xc5a\x0ftL\xdb\xcf#\x920n\xe6T}\xff\xad-ku/\x0c\x1a'
         dbMask = self.mgf1(seed, k - hLen - 1)
         maskedDb = bytes_xor(db, dbMask)
         seedMask = self.mgf1(maskedDb, hLen)
@@ -76,7 +70,9 @@ class RSA:
         hLen = 32 
         k = 256
         if k < 2*hLen + 2:
-            return "decryption error"
+            raise Exception("decryption error k >= 2*hLen + 2")
+        if k != len(ciphertext):
+            raise Exception("a mensagem deve ter tamanho k = {:d}, tamanho recebido = {:d}".format(k, len(ciphertext)))
 
         em = ciphertext
         Y = em[0]
@@ -94,11 +90,16 @@ class RSA:
             if i == 1:
                 break 
             idx += 1
+
+        # if Y != 0:
+        #     raise Exception("Y deve ser igual a zero")
+        # elif idx == len(padd):
+        #     raise Exception("Não há valor 0x01 que separa a mensagem")
+
         return padd[idx+1:]
 
 
         
-
     # https://www.rfc-editor.org/rfc/rfc8017#section-4.1
 
     '''
