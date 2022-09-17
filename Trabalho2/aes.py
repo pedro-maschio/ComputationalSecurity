@@ -22,9 +22,7 @@ class AES:
     '''
     def expand_key(self, key):
         key_columns = byte_array_to_matrice(key) 
-        print(key_columns)
         iteration_size = len(key) // 4 # 4 words for AES-128 (this one), 6 words for AES-192, and 8 words for AES-256. word = 32 bits
-        print("iteration size = " + str(iteration_size))
         i = 1
         
         while len(key_columns) < (self.rounds + 1) * 4:
@@ -76,7 +74,8 @@ class AES:
         while len(plaintext) % block_size != 0:
             # PKCS#7: we fill the last n blocks with n bytes of value n https://stackoverflow.com/questions/13572253/what-kind-of-padding-should-aes-use
             padding_len = (16 - (len(plaintext) % 16))
-            padding = bytes([padding_len] * padding_len)
+            # actually we are filling with zeroes now
+            padding = bytes([0] * padding_len)
             plaintext = plaintext + padding
         retorno = [plaintext[i:i+16] for i in range(0, len(plaintext), block_size)] 
         
@@ -113,9 +112,9 @@ class AES:
         return b''.join(blocks)
 
     '''
-        Decrypts in CTR mode, it is the same as encryption
+        Decrifra uma mensagem em modo CTR, o código é igual ao criptografia.
     '''
-    def decrypt_ctr(self, ciphertext, iv):
+    def decrypt_ctr(self, ciphertext: bytes, iv: bytes):
         
         blocks = []
         temp = iv 
