@@ -47,8 +47,8 @@ class RSA:
         k = 256 # tamanho da saída em bytes (são 2048 bits)
 
         if mLen > k - 2*hLen - 2:
-            return "message too long"
-        lHash = hashlib.sha3_256(bytes(label, 'latin1')).digest()
+            return "mensagem muito grande"
+        lHash = hashlib.sha3_256(bytes(label, 'utf-8')).digest()
         paddingString = (0).to_bytes(k - mLen - 2*hLen - 2, 'big')
 
         db = lHash + paddingString + (1).to_bytes(1, 'big') + message
@@ -70,7 +70,7 @@ class RSA:
         hLen = 32 
         k = 256
         if k < 2*hLen + 2:
-            raise Exception("decryption error k >= 2*hLen + 2")
+            raise Exception("erro na descriptografação k >= 2*hLen + 2")
         if k != len(ciphertext):
             raise Exception("a mensagem deve ter tamanho k = {:d}, tamanho recebido = {:d}".format(k, len(ciphertext)))
 

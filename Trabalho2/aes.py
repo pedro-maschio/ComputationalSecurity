@@ -51,7 +51,7 @@ class AES:
     '''
         Criptografa um único bloco de 16 bytes de texto e retorna uma matriz 4-4.
     '''
-    def encrypt(self, plaintext):
+    def encrypt(self, plaintext: bytes):
         keyi = 0
 
         plaintext = byte_array_to_matrice(plaintext)
@@ -70,7 +70,7 @@ class AES:
         
         return bytes(sum(plaintext, [])) # converts the 4x4 matrix to 16-byte array
 
-    def divide_in_blocks(self, plaintext, block_size=16):
+    def divide_in_blocks(self, plaintext: bytes, block_size: int =16):
         while len(plaintext) % block_size != 0:
             # PKCS#7: we fill the last n blocks with n bytes of value n https://stackoverflow.com/questions/13572253/what-kind-of-padding-should-aes-use
             padding_len = (16 - (len(plaintext) % 16))
@@ -81,7 +81,7 @@ class AES:
         
         return retorno
 
-    def increment_iv(self, iv):
+    def increment_iv(self, iv: bytes):
         saida = list(iv)
 
         for i in reversed(range(len(saida))):
@@ -92,7 +92,7 @@ class AES:
                 break 
         return bytes(saida)
 
-    def xor_bytes(self, a, b):
+    def xor_bytes(self, a: bytes, b: bytes):
         """ Returns a new byte array with the elements xor'ed. """
         return bytes(i^j for i, j in zip(a, b))
 
@@ -130,7 +130,7 @@ class AES:
     '''
         Recebe o estado e faz o XOR com a chave.
     '''
-    def add_key(self, state: bytes, key):
+    def add_key(self, state: bytes, key: bytes):
         for i in range(4):
             for j in range(4):
                 state[i][j] ^= key[i][j]
@@ -139,7 +139,7 @@ class AES:
     '''
         Substitui os bytes do estado atual pelos bytes da S box
     '''
-    def sub_bytes(self, state):
+    def sub_bytes(self, state: bytes):
         for i in range(4):
             for j in range(4):
                 state[i][j] = Constants.sbox[state[i][j]]
@@ -164,31 +164,31 @@ class AES:
             state[i] = self.__shift_right(state[i], i)
         return state
 
-    def __shift_left(self, state_row, shifts):
+    def __shift_left(self, state_row: bytes, shifts: int):
         return state_row[shifts:] + state_row[:shifts]
 
-    def __shift_right(self, state_row, shifts):
+    def __shift_right(self, state_row: bytes, shifts: int):
         return state_row[-shifts:] + state_row[:-shifts]
 
 
     '''
         Uma operação feita nas colunas que envolve a multiplicação e adição no campo de Galois
     '''
-    def mix_cols(self, state):
+    def mix_cols(self, state: bytes):
         for i in range(4):
             col = self.__mix_column(state, i)
             for j in range(4):
                 state[j][i] = col[j]
         return state
 
-    def inverse_mix_cols(self, state):
+    def inverse_mix_cols(self, state: bytes):
         for i in range(4):
             col = self.__inverse_mix_column(state, i)
             for j in range(4):
                 state[j][i] = col[j]
         return state
 
-    def __mix_column(self, state, i):
+    def __mix_column(self, state: bytes, i: int):
         c0 = Constants.galoismult2[state[0][i]] ^ Constants.galoismult3[state[1][i]] ^ state[2][i] ^ state[3][i]
         c1 = state[0][i] ^ Constants.galoismult2[state[1][i]] ^ Constants.galoismult3[state[2][i]] ^ state[3][i]
         c2 = state[0][i] ^ state[1][i] ^ Constants.galoismult2[state[2][i]]  ^ Constants.galoismult3[state[3][i]]
@@ -196,7 +196,7 @@ class AES:
 
         return [c0, c1, c2, c3]
 
-    def __inverse_mix_column(self, state, i):
+    def __inverse_mix_column(self, state: bytes, i: int):
         c0 = Constants.galoismult14[state[0][i]] ^ Constants.galoismult11[state[1][i]] ^ Constants.galoismult13[state[2][i]] ^ Constants.galoismult9[state[3][i]]  
         c1 = Constants.galoismult9[state[0][i]] ^ Constants.galoismult14[state[1][i]] ^ Constants.galoismult11[state[2][i]] ^ Constants.galoismult13[state[3][i]]
         c2 = Constants.galoismult13[state[0][i]] ^ Constants.galoismult9[state[1][i]] ^ Constants.galoismult14[state[2][i]] ^ Constants.galoismult11[state[3][i]]
