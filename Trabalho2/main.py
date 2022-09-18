@@ -1,5 +1,4 @@
 import base64
-from email.mime import base
 import hashlib
 import sys
 from aes import AES

@@ -109,7 +109,7 @@ class AES:
         return b''.join(blocks)
 
     '''
-        Decrifra uma mensagem em modo CTR, o código é igual ao criptografia.
+        Decifra uma mensagem em modo CTR, o código é igual ao criptografia.
     '''
     def decrypt_ctr(self, ciphertext: bytes, iv: bytes):
         
@@ -142,31 +142,13 @@ class AES:
                 state[i][j] = Constants.sbox[state[i][j]]
         return state
 
-    '''
-        Aplica a operação de inversão 
-    '''
-    def inverse_sub_bytes(self, state: bytes):
-        for i in range(4):
-            for j in range(4):
-                state[i][j] = Constants.invertsbox[state[i][j]]
-        return state
-
     def shift_rows(self, state: bytes):
         for i in range(1, 4):
             state[i] = self.__shift_left(state[i], i)
         return state
 
-    def inverse_shift_rows(self, state: bytes):
-        for i in range(1, 4):
-            state[i] = self.__shift_right(state[i], i)
-        return state
-
     def __shift_left(self, state_row: bytes, shifts: int):
         return state_row[shifts:] + state_row[:shifts]
-
-    def __shift_right(self, state_row: bytes, shifts: int):
-        return state_row[-shifts:] + state_row[:-shifts]
-
 
     '''
         Uma operação feita nas colunas que envolve a multiplicação e adição no campo de Galois
@@ -178,25 +160,10 @@ class AES:
                 state[j][i] = col[j]
         return state
 
-    def inverse_mix_cols(self, state: bytes):
-        for i in range(4):
-            col = self.__inverse_mix_column(state, i)
-            for j in range(4):
-                state[j][i] = col[j]
-        return state
-
     def __mix_column(self, state: bytes, i: int):
         c0 = Constants.galoismult2[state[0][i]] ^ Constants.galoismult3[state[1][i]] ^ state[2][i] ^ state[3][i]
         c1 = state[0][i] ^ Constants.galoismult2[state[1][i]] ^ Constants.galoismult3[state[2][i]] ^ state[3][i]
         c2 = state[0][i] ^ state[1][i] ^ Constants.galoismult2[state[2][i]]  ^ Constants.galoismult3[state[3][i]]
         c3 = Constants.galoismult3[state[0][i]] ^ state[1][i] ^ state[2][i] ^ Constants.galoismult2[state[3][i]]
-
-        return [c0, c1, c2, c3]
-
-    def __inverse_mix_column(self, state: bytes, i: int):
-        c0 = Constants.galoismult14[state[0][i]] ^ Constants.galoismult11[state[1][i]] ^ Constants.galoismult13[state[2][i]] ^ Constants.galoismult9[state[3][i]]  
-        c1 = Constants.galoismult9[state[0][i]] ^ Constants.galoismult14[state[1][i]] ^ Constants.galoismult11[state[2][i]] ^ Constants.galoismult13[state[3][i]]
-        c2 = Constants.galoismult13[state[0][i]] ^ Constants.galoismult9[state[1][i]] ^ Constants.galoismult14[state[2][i]] ^ Constants.galoismult11[state[3][i]]
-        c3 = Constants.galoismult11[state[0][i]] ^ Constants.galoismult13[state[1][i]] ^ Constants.galoismult9[state[2][i]] ^ Constants.galoismult14[state[3][i]]
 
         return [c0, c1, c2, c3]
