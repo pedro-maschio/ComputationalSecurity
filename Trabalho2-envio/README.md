@@ -14,8 +14,9 @@ O programa segue os seguintes passos:
 Durante a sua execução, o programa gera os seguintes arquivos:
 
 1. *message.bin*: esse arquivo contém a mensagem cifrada pelo AES CTR;
-2. *key.bin*: esse arquivo contém a chave AES criptografada pelo RSA
-3. *hash.bin*: esse arquivo contém o Hash do arquivo cifrado
+2. *key.bin*: esse arquivo contém a chave AES criptografada pelo RSA;
+3. *hash.bin*: esse arquivo contém o Hash do arquivo cifrado;
+4. *message_deciphered.bin*: esse arquivo é o arquivo descriptografado.
 
 ## Como executar
 ```

@@ -11,15 +11,15 @@ Parte II: Cifra simétrica
 
 Parte III: Geração da assinatura
 - [x] Cálculo de hashes da mensagem em claro (função de hash SHA-3)
-- [ ] Assinatura da mensagem (cifração do hash da mensagem usando OAEP)
-- [ ] Formatação do resultado (caracteres especiais e informações para verificação em
+- [x] Assinatura da mensagem (cifração do hash da mensagem usando OAEP)
+- [x] Formatação do resultado (caracteres especiais e informações para verificação em
 BASE64)
 
 Parte IV: Verificação:
-- [ ] Parsing do documento assinado e decifração da mensagem (de acordo com a
+- [x] Parsing do documento assinado e decifração da mensagem (de acordo com a
 formatação usada, no caso BASE64)
-- [ ] Decifração da assinatura (decifração do hash)
-- [ ] Verificação (cálculo e comparação do hash do arquivo)
+- [x] Decifração da assinatura (decifração do hash)
+- [x] Verificação (cálculo e comparação do hash do arquivo)
 
 
 A pontuação máxima será conferida aos trabalhos que realmente implementarem as 
