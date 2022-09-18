@@ -1,1 +1,0 @@
-b'Este \xc3\xa9 um exemplo de mensagem que deve ser corretamente criptografa e descriptografada'

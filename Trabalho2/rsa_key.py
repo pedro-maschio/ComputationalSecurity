@@ -2,7 +2,7 @@ import random
 dice = random.SystemRandom()
 
 
-def single_test(n, a):
+def single_test(n: int, a: int):
     exp = n - 1
     
     while exp % 2 == 0:
@@ -17,7 +17,7 @@ def single_test(n, a):
         exp *= 2
     return False 
 
-def is_prime(n, r=64):
+def is_prime(n, r: int =64):
     if n % 2 == 0:
         return False
     
@@ -28,7 +28,7 @@ def is_prime(n, r=64):
             return False 
     return True 
 
-def get_key(n_bits=1024):
+def get_key(n_bits: int =1024):
     while True:
         random_number = dice.getrandbits(n_bits)
         if(is_prime(random_number)):

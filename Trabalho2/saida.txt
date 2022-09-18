@@ -1,5 +1,0 @@
-Hash do arquivo lido: 1c9f86a28d35dfd67fb74abf1f4746331b999cf0597e71fa9530d3715de1cda2
-Chave utilizada para criptografá-lo: 78583386b4fc4a8b24f4535dcc770f40
-Arquivo criptografado, pressione enter para continuarHash do arquivo lido: 1c9f86a28d35dfd67fb74abf1f4746331b999cf0597e71fa9530d3715de1cda2
-Hash descriptografado: 7de582150e116c00dfd30bc170b97ac218942e56fa5952293814196cd1333679
-Assinatura incorreta, arquivo adulterado!!
