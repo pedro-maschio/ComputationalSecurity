@@ -21,5 +21,10 @@ Durante a sua execução, o programa gera os seguintes arquivos:
 ```
 python main.py <nome_do_arquivo_a_ser_assinado>
 ```
+Para ter acesso ao modo verbose, que também imprime o arquivo lido, cifrado e decifrado, execute desta forma:
+
+```
+python main.py <nome_do_arquivo_a_ser_assinado> -v
+```
 
 Autores: Pedro Maschio (190018763) & Gabriel Martins (190013371)
