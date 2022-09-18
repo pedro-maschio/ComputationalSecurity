@@ -48,7 +48,7 @@ class RSA:
 
         if mLen > k - 2*hLen - 2:
             return "message too long"
-        lHash = hashlib.sha3_256(bytes(label, 'utf-8')).digest()
+        lHash = hashlib.sha3_256(bytes(label, 'latin1')).digest()
         paddingString = (0).to_bytes(k - mLen - 2*hLen - 2, 'big')
 
         db = lHash + paddingString + (1).to_bytes(1, 'big') + message

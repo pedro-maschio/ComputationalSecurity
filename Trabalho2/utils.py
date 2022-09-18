@@ -2,7 +2,7 @@ import random as random
 dice = random.SystemRandom()
 
 '''
-    Generate a 128-bit key and converts it to a 4x4-byte matrix
+    Gera uma chave de 128-bits e a converte para uma matriz 4x4.
 '''
 def generate_key():
     k = dice.getrandbits(128)

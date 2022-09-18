@@ -30,7 +30,11 @@ def main(file_name):
     print('Hash do arquivo lido: ' + file_hash1.hex())
     print('Chave utilizada para criptografá-lo: ' + aes_key.hex())
 
+    print("MENSAGEM LIDA: ")
+    print(file)
+
     # Criptografamos o arquivo com o AES
+    print('iv: ' + str(iv))
     file_encrypted = aes.encrypt_ctr(file, iv)
 
     print("MENSAGEM CIFRADA: ")
@@ -54,8 +58,7 @@ def main(file_name):
     with open('key.bin', 'wb') as f:
         f.write(aes_key_encrypted_b64)
 
-    input('Arquivo criptografado, pressione enter para continuar')
-
+    #input('Arquivo criptografado, pressione enter para continuar')
 
     # Abrimos os arquivos
     with open('hash.bin', 'rb') as f:
@@ -66,34 +69,38 @@ def main(file_name):
         key_received = base64.b64decode(f.read())
     
     # Decodificamos o hash do arquivo e a chave do AES com o RSA
-    hash_received_decrypted = gabriel.cipher_or_decipher(int.from_bytes(hash_received, 'big'), gabriel.private_key)
-    hash_received_decrypted_and_unpadded = gabriel.oaep_decipher(hash_received_decrypted.to_bytes(calc_num_bytes(hash_received_decrypted)+1, 'big'))
+    file_hash1_decrypted = gabriel.cipher_or_decipher(int.from_bytes(hash_received, 'big'), gabriel.private_key)
+    file_hash1_decrypted = gabriel.oaep_decipher(file_hash1_decrypted.to_bytes(calc_num_bytes(file_hash1_decrypted)+1, 'big'))
 
     key_received_decrypted = gabriel.cipher_or_decipher(int.from_bytes(key_received, 'big'), gabriel.private_key)
     key_received_decrypted_and_unpadded = gabriel.oaep_decipher(key_received_decrypted.to_bytes(calc_num_bytes(key_received_decrypted)+1, 'big'))
 
-    # Decodificamos a mensagem com o AES
+    # Decodificamos a mensagem com o AES e removemos o padding
     aes.key_matrices = aes.expand_key(key_received_decrypted_and_unpadded)
+    print('iv: ' + str(iv))
     message_received_decrypted = aes.decrypt_ctr(message_received, iv)
     for i in reversed(message_received_decrypted):
         if i == 0:
             message_received_decrypted = message_received_decrypted[:(len(message_received_decrypted)-1)]
 
-    new_hash = hashlib.sha3_256(message_received_decrypted).hexdigest()
-
+    # Calculamos o hash da mensagem decifrada
+    new_hash = hashlib.sha3_256(message_received_decrypted).digest()
 
     print("MENSAGEM DECIFRADA: ")
     print(message_received_decrypted)
 
+    with open('message_deciphered.bin', 'w') as f:
+        f.write(str(message_received_decrypted))
+
+
+    print('Hash do arquivo lido: ' + file_hash1_decrypted.hex())
+    print('Hash descriptografado: ' + new_hash.hex())
+
     # Verificamos a assinatura da mensagem (comparamos o hash que foi enviado com o hash do arquivo descriptografado)
-    if hash_received_decrypted_and_unpadded.hex() == new_hash:
+    if file_hash1_decrypted.hex() == new_hash.hex():
         print("Assinatura correta!!")
     else:
         print("Assinatura incorreta, arquivo adulterado!!")
 
     
-
-
-
-
 main(sys.argv[1:])
