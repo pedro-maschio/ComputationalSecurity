@@ -2,7 +2,6 @@ import random
 dice = random.SystemRandom()
 
 
-
 def single_test(n, a):
     exp = n - 1
     

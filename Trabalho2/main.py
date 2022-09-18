@@ -1,147 +1,111 @@
 import base64
+from email.mime import base
 import hashlib
-from math import ceil
+import sys
 from aes import AES
-import random as random
 from rsa import RSA
+import random
+
 from utils import calc_num_bytes 
 dice = random.SystemRandom()
 
-
-
-# key = b'2b7e151628aed2a6abf7158809cf4f3c'
-iv = b'\xe5\xc8!\x8e@\xc6\xc3\xf2FH)s\xed{\x0f\x12'
-# encrypted_text = AES(key).encrypt_ctr(b'Pedro de torrres maschio', iv)
-# print(AES(key).decrypt_ctr(encrypted_text, iv))
-
-
-
-
-with open('entrada.txt', 'r', encoding='utf-8') as f:
-    plaintext = f.read()
-
-# aes_key = dice.getrandbits(128) 
-# plaintext = bytes(plaintext, 'utf-8')
-# key = aes_key.to_bytes(16, 'big')
-# file_hash = hashlib.sha3_256(plaintext)
-# aes = AES(key)
-
-
-# This works
-# encrypted_file = aes.encrypt_ctr(plaintext, iv)
-# print('encrypted_file')
-# print(encrypted_file)
-
-# de = aes.decrypt_ctr(encrypted_file, iv)
-# print('decrypted_file')
-# print(de)
-
-
-
-for i in range(200):
-
+def main(file_name):
+    if len(file_name) != 1:
+        exit(1)
+    
+    # Geramos os objetos que representam as pessoas que vão se comunicar
     pedro = RSA()
-    #pedro.public_key = [2236793410064750442178828413201050518424766229139219693855603328129442426038743440825897860516164212773969740518556809894085759962523452844095614374566104632457414109856395291250582425045995134061235719004388283559261722651926991142697020895841566700113405819391839904256216762887814494771679257044292302789331640824077939984680821899599257838718073635288737506674758490582591229347488079762711571417739527124398143962192553966355866539732641027456547711468051240345155601681596188595388363463817470816560373246091254833863439802398592211584210923671611867467637183893582924096930373452388646732995893360677061325921, 65537]
-    #pedro.private_key = [2236793410064750442178828413201050518424766229139219693855603328129442426038743440825897860516164212773969740518556809894085759962523452844095614374566104632457414109856395291250582425045995134061235719004388283559261722651926991142697020895841566700113405819391839904256216762887814494771679257044292302789331640824077939984680821899599257838718073635288737506674758490582591229347488079762711571417739527124398143962192553966355866539732641027456547711468051240345155601681596188595388363463817470816560373246091254833863439802398592211584210923671611867467637183893582924096930373452388646732995893360677061325921, 963257708046713333378291259987079798915149873887974692459018458730141043839227552839301697016154272809554114266066936930905937156450545640156103033299955308327289903756306274394085597175231101036212455520711209345759549543087652334106505039036521918569672893795808438253554567633287890595253119177885189459703076566856272618526219474569552016158160148383321206639953591411696127816386674405496623530482926753729545136616609286468433203589386582448734278190008537712280167338913439048625574575313171017747300339862479090983661228372273900338295324443678135969245165718638182321671480427572705200985891583394243495249]
-    gabigue = RSA()
-    #gabigue.public_key = [2110606234410179373279392628195501474329733928441627232010793978845042305501094355240352539545544794400237494397004897401267512405018067000336652843859116305003798573539640222357309611260686705897131204779930808139593850271504407180189947608477493398363587880576565411393738369467967131213973274016469854760262390049549543305439860809771905938390202617545507449029879233860757346721383129393675985806104607282153962961970155402369289260365053335958455396895823879297177554386252929482686033275779875593069241036336544787380328525033747994586986120789037121672890733090131127536338950822918437402018436300257503533347, 65537]
-    #gabigue.private_key=[2110606234410179373279392628195501474329733928441627232010793978845042305501094355240352539545544794400237494397004897401267512405018067000336652843859116305003798573539640222357309611260686705897131204779930808139593850271504407180189947608477493398363587880576565411393738369467967131213973274016469854760262390049549543305439860809771905938390202617545507449029879233860757346721383129393675985806104607282153962961970155402369289260365053335958455396895823879297177554386252929482686033275779875593069241036336544787380328525033747994586986120789037121672890733090131127536338950822918437402018436300257503533347, 441978728978215385490431121799213608094683437354973406352383181495481340322215220887721413136442875907485227781321928253276703850442772044991687499109243819062089073702763666503375453635986760940113655712037023527286662513177693274652895936322155719656711171903394780138969824413360100535278838100645929577611232883940758613282312215953448823086647853267296335944984256046128501035689845372209995888145346796718479056974407977888849254499145775133201189006194914768667491057203143007448288161179705607687969166244398026502807444926114107198003804484305073551064456679440469052963726932083213341627520328234494851265]
+    gabriel = RSA()
 
-    aes_key = dice.getrandbits(128) 
-    #aes_key = 198930662574868207192523987095544128209 #0x95a8a6e8e163242799d977f4db2be2d1 linha 180
-    key = aes_key.to_bytes(16, 'big')
-    aes_ciphered_key = pedro.oaep_cipher(key, gabigue.public_key)
+    aes_key = dice.getrandbits(128).to_bytes(16, 'big')
+    iv = dice.getrandbits(128).to_bytes(16, 'big')
 
-    aes_de_oaep_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
+    aes = AES(aes_key)
 
-    #print("AES CIPHERED")
-    #print(hex(aes_de_oaep_key))
+    with open(file_name[0], 'rb') as f:
+        file = f.read()
 
-    # to_bytes recebe como parâmetro a quantidade de bytes, caso o bit_length (número de bits) não seja múltiplo de oito
-    # precisamos colocar esse último(s) bits em um byte a parte
-    aes_deciphered_key = gabigue.oaep_decipher(aes_de_oaep_key.to_bytes(calc_num_bytes(aes_ciphered_key), 'big'))
-    #print("AES DECIPHERED")
-    #print(hex(int.from_bytes(aes_deciphered_key, 'big')))
+    file_hash1 = hashlib.sha3_256(file).digest()
 
-    print(f"pedro.public_key={pedro.public_key} pedro.private_key={pedro.private_key} gabigue.public_key={gabigue.public_key} gabigue.private_key={gabigue.private_key} ", end = '')
-    print(aes_deciphered_key)
-    print(f" {hex(aes_key)} == {hex(int.from_bytes(aes_deciphered_key, 'big'))} = ", end='')
-    print(f"{hex(aes_key) == hex(int.from_bytes(aes_deciphered_key, 'big'))}")
+    print('Hash do arquivo lido: ' + file_hash1.hex())
+    print('Chave utilizada para criptografá-lo: ' + aes_key.hex())
+
+    print("MENSAGEM LIDA: ")
+    print(file)
+
+    with open('a.txt', 'w') as f:
+        f.write(str(file))
+
+    # Criptografamos o arquivo com o AES)
+    file_encrypted = aes.encrypt_ctr(file, iv)
+
+    print("MENSAGEM CIFRADA: ")
+    print(str(file_encrypted))
+
+    # Criptografamos a chave do AES com o RSA
+    aes_key_encrypted = pedro.oaep_cipher(aes_key, gabriel.public_key)
+
+    # Criptografamos o hash do arquivo com o RSA também
+    file_hash1_encrypted = pedro.oaep_cipher(file_hash1, gabriel.public_key)
+    
+    # Codificamos em Base 64 e salvamos os arquivos
+    file_hash1_b64 = base64.b64encode(file_hash1_encrypted.to_bytes(calc_num_bytes(file_hash1_encrypted), 'big'))
+    file_encrypted_b64 = base64.b64encode(file_encrypted)
+    aes_key_encrypted_b64 = base64.b64encode(aes_key_encrypted.to_bytes(calc_num_bytes(aes_key_encrypted), 'big'))
+
+    with open('hash.bin', 'wb') as f:
+        f.write(file_hash1_b64)
+    with open('message.bin', 'wb') as f:
+        f.write(file_encrypted_b64)
+    with open('key.bin', 'wb') as f:
+        f.write(aes_key_encrypted_b64)
+
+    input('Arquivo criptografado, pressione enter para continuar')
+
+    # Abrimos os arquivos
+    with open('hash.bin', 'rb') as f:
+        hash_received = base64.b64decode(f.read())
+    with open('message.bin', 'rb') as f:
+        message_received = base64.b64decode(f.read())
+    with open('key.bin', 'rb') as f:
+        key_received = base64.b64decode(f.read())
+    
+    # Decodificamos o hash do arquivo e a chave do AES com o RSA
+    file_hash1_decrypted = gabriel.cipher_or_decipher(int.from_bytes(hash_received, 'big'), gabriel.private_key)
+    file_hash1_decrypted = gabriel.oaep_decipher(file_hash1_decrypted.to_bytes(calc_num_bytes(file_hash1_decrypted)+1, 'big'))
+
+    key_received_decrypted = gabriel.cipher_or_decipher(int.from_bytes(key_received, 'big'), gabriel.private_key)
+    key_received_decrypted_and_unpadded = gabriel.oaep_decipher(key_received_decrypted.to_bytes(calc_num_bytes(key_received_decrypted)+1, 'big'))
+
+    # Decodificamos a mensagem com o AES e removemos o padding
+    aes.key_matrices = aes.expand_key(key_received_decrypted_and_unpadded)
+    message_received_decrypted = aes.decrypt_ctr(message_received, iv)
+
+    last_byte = message_received_decrypted[len(message_received_decrypted)-1]
+    for i in range(int(last_byte)):
+        message_received_decrypted = message_received_decrypted[:(len(message_received_decrypted)-1)]
+
+    # Calculamos o hash da mensagem decifrada
+    new_hash = hashlib.sha3_256(message_received_decrypted).digest()
+
+    print("MENSAGEM DECIFRADA: ")
+    print(message_received_decrypted)
+
+    with open('b.txt', 'w') as f:
+        f.write(str(message_received_decrypted))
+
+    with open('message_deciphered.bin', 'wb') as f:
+        f.write(message_received_decrypted)
 
 
+    print('Hash do arquivo lido: ' + file_hash1_decrypted.hex())
+    print('Hash descriptografado: ' + new_hash.hex())
 
+    # Verificamos a assinatura da mensagem (comparamos o hash que foi enviado com o hash do arquivo descriptografado)
+    if file_hash1_decrypted.hex() == new_hash.hex():
+        print("Assinatura correta!!")
+    else:
+        print("Assinatura incorreta, arquivo adulterado!!")
 
-
-
-
-
-# aes_ciphered_key = pedro.cipher_or_decipher(int.from_bytes(key, 'big'), gabigue.public_key)
-# print("AES KEY CIPHERED")
-# print(hex(aes_ciphered_key))
-
-# file_ciphered_hash = pedro.cipher_or_decipher(int.from_bytes(file_hash.digest(), 'big'), gabigue.public_key)
-# print("FILE HASH CIPHERED")
-# print(hex(file_ciphered_hash))
-
-
-# aes_deciphered_key = gabigue.cipher_or_decipher(aes_ciphered_key, gabigue.private_key)
-# print("AES KEY DECIPHERED")
-# print(hex(aes_deciphered_key))
-
-# file_deciphered_hash = gabigue.cipher_or_decipher(file_ciphered_hash, gabigue.private_key)
-# print("FILE HASH DECIPHERED")
-# print(hex(file_deciphered_hash))
-
-
-
-
-
-
-
-
-
-
-# while True:
-#     print("SUPER SIGNATURE CIPHER")
-#     print("1. Cifrar com AES CTR")
-#     print("2. Decifrar com AES CTR")
-#     print("Escolha: ", end='')
-#     option = int(input())
-
-#     if option == 1:
-#         print("Informe o nome do arquivo a ser cifrado: (.txt) ")
-#         file_name = input()
-
-#         with open(file_name, 'r', encoding='utf-8') as f:
-#             plaintext = f.read()
-
-#         key = dice.getrandbits(128)
-#         print("AES key: " + hex(key))
-#         key = key.to_bytes(16, 'big')
-#         aes = AES(key)    
-
-#         plaintext = bytes(plaintext, 'utf-8')
-        
-#         encrypted_file = base64.b64encode(aes.encrypt_ctr(plaintext, iv))
-
-        
-#         with open('key.bin', 'wb') as f:
-#             f.write(base64.b64encode(key))
-#         with open('message.bin', 'wb') as f:
-#             f.write(encrypted_file)
-        
-
-#     else:
-#         with open('key.bin', 'rb') as f:
-#             key = f.read()
-#             key = base64.b64decode(key)
-#         with open('message.bin', 'rb') as f:
-#             message = f.read()
-#             message = base64.b64decode(message)
-
-#         aes = AES(key)     
-#         decrypted_file = aes.decrypt_ctr(message, iv)
-
-#         print(decrypted_file)
-
-#         break
+    
+main(sys.argv[1:])

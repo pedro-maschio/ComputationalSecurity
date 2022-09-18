@@ -14,7 +14,7 @@ class RSA:
         self.n = self.p * self.q
         self.phi = (self.p-1)*(self.q-1)
         self.e = 65537
-        self.d = egcd(self.e, self.phi)[1] # https://crypto.stackexchange.com/questions/5889/calculating-rsa-private-exponent-when-given-public-exponent-and-the-modulus-fact
+        self.d = egcd(self.e, self.phi)[1] 
 
         if(self.d < 0):
             self.d += self.phi
@@ -39,8 +39,6 @@ class RSA:
         return pow(message, key[1], key[0])
         
 
-
-    ## https://www.rfc-editor.org/rfc/rfc8017#section-7.1
     def oaep_cipher(self, message: bytes, key: List[int], label: str = "") -> int:
         mLen = len(message) # tamanho da mensagem que estamos recebendo (em bytes)
         hLen = 32 # tamanho do hash em bytes (256 bits)
@@ -64,7 +62,7 @@ class RSA:
 
         return self.cipher_or_decipher(int.from_bytes(em, 'big'), key)
 
-    # https://www.rfc-editor.org/rfc/rfc8017#section-7.1.2
+
     def oaep_decipher(self, ciphertext: bytes, label: str = "") -> bytes:
         
         hLen = 32 
@@ -91,16 +89,8 @@ class RSA:
                 break 
             idx += 1
 
-        # if Y != 0:
-        #     raise Exception("Y deve ser igual a zero")
-        # elif idx == len(padd):
-        #     raise Exception("Não há valor 0x01 que separa a mensagem")
-
         return padd[idx+1:]
 
-
-        
-    # https://www.rfc-editor.org/rfc/rfc8017#section-4.1
 
     '''
         Converte um inteiro x para uma representação em string de bytes de tamanho xLen
@@ -108,7 +98,6 @@ class RSA:
     def I2OSP(self, x: int, xLen: int = 4):
         return x.to_bytes(xLen, 'big')
 
-    # https://www.rfc-editor.org/rfc/rfc8017#appendix-B
     def mgf1(self, mfgSeed: bytes, maskLen: int):
         t = b""
         i = 0 

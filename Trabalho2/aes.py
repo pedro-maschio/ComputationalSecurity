@@ -62,19 +62,18 @@ class AES:
         for i in range(1, self.rounds): 
             plaintext = self.sub_bytes(plaintext)
             plaintext = self.shift_rows(plaintext)
-            if i != self.rounds-1: # the last round doesn't have mix_cols step
+            if i != self.rounds-1: # a última rodada não tem esse passo
                 plaintext = self.mix_cols(plaintext)
-            plaintext = self.add_key(plaintext, self.key_matrices[i]) # we use only 16 bytes from the key expansion
+            plaintext = self.add_key(plaintext, self.key_matrices[i]) # só utilizamos 16 bytes da expansão da chave
             keyi += 4
             
         
-        return bytes(sum(plaintext, [])) # converts the 4x4 matrix to 16-byte array
+        return bytes(sum(plaintext, [])) # converte a matriz 4x4 para um vetor
 
     def divide_in_blocks(self, plaintext: bytes, block_size: int =16):
         while len(plaintext) % block_size != 0:
-            # PKCS#7: we fill the last n blocks with n bytes of value n https://stackoverflow.com/questions/13572253/what-kind-of-padding-should-aes-use
+            # PKCS#7
             padding_len = (16 - (len(plaintext) % 16))
-            # actually we are filling with zeroes now
             padding = bytes([padding_len] * padding_len)
             plaintext = plaintext + padding
         retorno = [plaintext[i:i+16] for i in range(0, len(plaintext), block_size)] 
@@ -86,26 +85,26 @@ class AES:
 
         for i in reversed(range(len(saida))):
             if saida[i] == 0xFF:
-                saida[i] = 0 # we can't increment more than FF
+                saida[i] = 0 # não podemos incrementar mais que isso
             else:
                 saida[i] += 1
                 break 
         return bytes(saida)
 
+    '''
+        Retorna um novo vetor de bytes com seus elementos XORizados
+    '''
     def xor_bytes(self, a: bytes, b: bytes):
-        """ Returns a new byte array with the elements xor'ed. """
         return bytes(i^j for i, j in zip(a, b))
 
 
-    #  https://www.gurutechnologies.net/blog/aes-ctr-encryption-in-c/
     def encrypt_ctr(self, plaintext: bytes, iv: bytes):
         
         blocks = []
         temp = iv 
 
         for block in self.divide_in_blocks(plaintext):
-            # In CTR mode encrypt we XOR the block message with Initializing Vector (iv)
-           
+            # No modo CTR nós fazemos um XOR do bloco de mensagem com o Initializing Vector
             blk = self.xor_bytes(block, self.encrypt(temp))
             blocks.append(blk)
             temp = self.increment_iv(temp)
@@ -120,7 +119,7 @@ class AES:
         temp = iv 
 
         for block in self.divide_in_blocks(ciphertext):
-            # In CTR mode encrypt we XOR the block message with Initializing Vector (iv)
+            # No modo CTR nós fazemos um XOR do bloco de mensagem com o Initializing Vector
             blk = self.xor_bytes(block, self.encrypt(temp))
             blocks.append(blk)
             temp = self.increment_iv(temp)
