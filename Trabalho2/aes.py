@@ -75,7 +75,7 @@ class AES:
             # PKCS#7: we fill the last n blocks with n bytes of value n https://stackoverflow.com/questions/13572253/what-kind-of-padding-should-aes-use
             padding_len = (16 - (len(plaintext) % 16))
             # actually we are filling with zeroes now
-            padding = bytes([0] * padding_len)
+            padding = bytes([padding_len] * padding_len)
             plaintext = plaintext + padding
         retorno = [plaintext[i:i+16] for i in range(0, len(plaintext), block_size)] 
         

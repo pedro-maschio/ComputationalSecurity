@@ -33,8 +33,10 @@ def main(file_name):
     print("MENSAGEM LIDA: ")
     print(file)
 
-    # Criptografamos o arquivo com o AES
-    print('iv: ' + str(iv))
+    with open('a.txt', 'w') as f:
+        f.write(str(file))
+
+    # Criptografamos o arquivo com o AES)
     file_encrypted = aes.encrypt_ctr(file, iv)
 
     print("MENSAGEM CIFRADA: ")
@@ -58,7 +60,7 @@ def main(file_name):
     with open('key.bin', 'wb') as f:
         f.write(aes_key_encrypted_b64)
 
-    #input('Arquivo criptografado, pressione enter para continuar')
+    input('Arquivo criptografado, pressione enter para continuar')
 
     # Abrimos os arquivos
     with open('hash.bin', 'rb') as f:
@@ -77,11 +79,11 @@ def main(file_name):
 
     # Decodificamos a mensagem com o AES e removemos o padding
     aes.key_matrices = aes.expand_key(key_received_decrypted_and_unpadded)
-    print('iv: ' + str(iv))
     message_received_decrypted = aes.decrypt_ctr(message_received, iv)
-    for i in reversed(message_received_decrypted):
-        if i == 0:
-            message_received_decrypted = message_received_decrypted[:(len(message_received_decrypted)-1)]
+
+    last_byte = message_received_decrypted[len(message_received_decrypted)-1]
+    for i in range(int(last_byte)):
+        message_received_decrypted = message_received_decrypted[:(len(message_received_decrypted)-1)]
 
     # Calculamos o hash da mensagem decifrada
     new_hash = hashlib.sha3_256(message_received_decrypted).digest()
@@ -89,8 +91,11 @@ def main(file_name):
     print("MENSAGEM DECIFRADA: ")
     print(message_received_decrypted)
 
-    with open('message_deciphered.bin', 'w') as f:
+    with open('b.txt', 'w') as f:
         f.write(str(message_received_decrypted))
+
+    with open('message_deciphered.bin', 'wb') as f:
+        f.write(message_received_decrypted)
 
 
     print('Hash do arquivo lido: ' + file_hash1_decrypted.hex())
