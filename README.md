@@ -1,3 +1,3 @@
-# ComputationalSecurity
+# Segurança Computacional - UnB
 
-Respository to hold assignments for Computational Security course of UnB
+Repository to hold assignments for Computational Security course of UnB
